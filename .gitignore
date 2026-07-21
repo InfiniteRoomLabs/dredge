@@ -5,3 +5,10 @@ __pycache__/
 .dredge/
 .claude/
 .idea/
+build/
+dist/
+.coverage*
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+.pyright/

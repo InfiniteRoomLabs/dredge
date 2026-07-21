@@ -1,0 +1,5 @@
+- [ ] Tests cover the change (`uv run pytest --cov --cov-fail-under=90` passes)
+- [ ] `ruff check`, `ruff format --check`, and `pyright` pass
+- [ ] User-visible changes have a `## [Unreleased]` CHANGELOG entry
+- [ ] Compatibility surface (ledger grammar, config keys, env names, verbs, exit codes) unchanged - or the breaking change is called out below
+- [ ] Commits are signed off (DCO)

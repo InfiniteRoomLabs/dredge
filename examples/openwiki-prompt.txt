@@ -1,0 +1,10 @@
+Deep extraction pass over my conversation corpus (one batch of a scripted full sweep; id: {batch_id}).
+For EVERY conversation directory listed below: read its INDEX.md summary; when the summary mentions or even hints at ideas, projects, plans, tools, business thoughts, decisions, or abandoned/deferred work - or is too vague to rule that out - read the full conversation.md too. If a conversation.md is very large, read it in sections rather than all at once. Do not skip any listed directory.
+Extract every distinct idea, project concept, tool concept, business thought, and abandoned or forgotten thread into the wiki:
+- /ideas.md - every idea ever floated: one line each with status (pursued / abandoned / forgotten / recurring) and a source link to the conversation directory
+- /abandoned-threads.md - work or thoughts started and then dropped, with what remained undone
+- /projects.md - expand historical project detail where these conversations add it
+- other canonical pages (people, preferences, themes, timeline) when material fits there
+Merge with existing entries instead of duplicating. Append every processed directory to {ledger_hint} as '- <path> - <one-word disposition>'.
+Directories in this batch:
+{items}
