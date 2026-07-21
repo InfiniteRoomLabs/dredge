@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+# Match the dev machines' uv supply-chain gate so uv.lock verifies identically.
+env:
+  UV_EXCLUDE_NEWER: "7 days"
+
 jobs:
   lint:
     runs-on: ubuntu-latest
