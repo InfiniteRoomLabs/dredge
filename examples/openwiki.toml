@@ -1,0 +1,23 @@
+# Example: exhaustively backfill an OpenWiki personal wiki from a claudesync
+# conversation export, running the containerized openwiki agent per batch.
+# Copy, adjust paths, then:  dredge -c openwiki.toml plan && dredge -c openwiki.toml run
+[dredge]
+corpus_globs = [
+    "/home/you/claude-ai-export/conversations/*",
+    "/home/you/claude-ai-export/projects/*/conversations/*",
+]
+ledger = "/home/you/.openwiki/wiki/coverage-ledger.md"
+# The agent sees container paths; map host paths into that namespace so the
+# manifest and ledger agree.
+rewrites = ["/home/you/claude-ai-export=/sources/claude-ai-export"]
+ledger_hint = "/coverage-ledger.md"   # ledger path as the agent sees it
+prompt_file = "openwiki-prompt.txt"   # your extraction instructions; {batch_id} {items} {ledger_hint}
+batch_size = 40
+backoff = [300, 1800, 7200]           # provider-limit-shaped retry waits
+runner = [
+    "docker", "run", "--rm",
+    "-v", "/home/you/claude-ai-export:/sources/claude-ai-export:ro",
+    "-v", "/home/you/.openwiki:/home/openwiki/.openwiki",
+    "deathnerd/openwiki:latest",
+    "personal", "--print", "{prompt}",
+]
