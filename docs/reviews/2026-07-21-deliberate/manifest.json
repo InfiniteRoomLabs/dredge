@@ -1,0 +1,126 @@
+{
+  "status": "complete",
+  "layers": 5,
+  "agents": [
+    {
+      "provider": "anthropic",
+      "method": "claude-code",
+      "model": "fable",
+      "reasoning": "max"
+    },
+    {
+      "provider": "openai",
+      "method": "opencode",
+      "model": "gpt-5.6-sol",
+      "reasoning": "max"
+    },
+    {
+      "provider": "google",
+      "method": "opencode",
+      "model": "gemini-3.5-flash",
+      "reasoning": "max"
+    }
+  ],
+  "synthesizer": {
+    "provider": "openai",
+    "method": "opencode",
+    "model": "gpt-5.6-sol",
+    "reasoning": "max"
+  },
+  "context_dirs": [
+    "/home/deathnerd/projects/infinite-room-labs/dredge"
+  ],
+  "prompts": "/tmp/claude-1000/-home-deathnerd-projects-infinite-room-labs-openwiki-docker/578e83b9-e28e-4852-ab30-46cf5a2615c1/scratchpad/delib-dredge/prompts",
+  "config_sources": [
+    "/home/deathnerd/.config/review-net/config.toml",
+    "/tmp/claude-1000/-home-deathnerd-projects-infinite-room-labs-openwiki-docker/578e83b9-e28e-4852-ab30-46cf5a2615c1/scratchpad/delib-dredge/run.toml"
+  ],
+  "updated_at": "2026-07-21T21:55:13.962388+00:00",
+  "participation": {
+    "layer-1": [
+      {
+        "agent": "anthropic/fable",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "openai/gpt-5.6-sol",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "google/gemini-3.5-flash",
+        "ok": true,
+        "error": null
+      }
+    ],
+    "layer-2": [
+      {
+        "agent": "anthropic/fable",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "openai/gpt-5.6-sol",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "google/gemini-3.5-flash",
+        "ok": true,
+        "error": null
+      }
+    ],
+    "layer-3": [
+      {
+        "agent": "anthropic/fable",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "openai/gpt-5.6-sol",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "google/gemini-3.5-flash",
+        "ok": true,
+        "error": null
+      }
+    ],
+    "layer-4": [
+      {
+        "agent": "anthropic/fable",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "openai/gpt-5.6-sol",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "google/gemini-3.5-flash",
+        "ok": true,
+        "error": null
+      }
+    ],
+    "layer-5": [
+      {
+        "agent": "anthropic/fable",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "openai/gpt-5.6-sol",
+        "ok": true,
+        "error": null
+      },
+      {
+        "agent": "google/gemini-3.5-flash",
+        "ok": true,
+        "error": null
+      }
+    ]
+  }
+}
