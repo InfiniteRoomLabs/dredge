@@ -21,15 +21,20 @@ from .config import Config
 
 def enumerate_corpus(globs: Iterable[str], rewrites: Iterable[str] = ()) -> list[str]:
     """Expand globs on the host, then rewrite into the namespace the agent
-    sees (e.g. container mount paths) so manifest and ledger agree."""
-    pairs = [r.split("=", 1) for r in rewrites]
+    sees (e.g. container mount paths) so manifest and ledger agree.
+
+    Rewrites match on path-component boundaries, longest prefix first, so
+    /data=/x never captures /database.
+    """
+    pairs = sorted((r.split("=", 1) for r in rewrites), key=lambda p: -len(p[0]))
     items: set[str] = set()
     for g in globs:
         for p in globlib.glob(g):
             p = p.rstrip("/")
             for src, dst in pairs:
-                if p.startswith(src):
-                    p = dst + p[len(src):]
+                src = src.rstrip("/")
+                if p == src or p.startswith(src + "/"):
+                    p = dst.rstrip("/") + p[len(src):]
                     break
             items.add(p)
     return sorted(items)
@@ -42,8 +47,10 @@ def covered(ledger: Path) -> set[str]:
         return done
     for line in ledger.read_text().splitlines():
         line = line.strip()
-        if line.startswith("- "):
-            path = line[2:].split(" - ")[0].strip()
+        if line.startswith("- ") and " - " in line[2:]:
+            # Disposition is the last " - " field; the path itself may
+            # contain " - ", so split from the right.
+            path = line[2:].rsplit(" - ", 1)[0].strip()
             if path:
                 done.add(path.rstrip("/"))
     return done
@@ -84,13 +91,19 @@ class Sweep:
     def _exec(self, argv: list[str]) -> bool:
         return subprocess.run(argv, check=False).returncode == 0
 
+    def _render_prompt(self, batch_id: str, items: list[str]) -> str:
+        # Token replacement, not str.format(): user templates and item paths
+        # may legitimately contain braces.
+        return (
+            self.cfg.prompt_template()
+            .replace("{batch_id}", batch_id)
+            .replace("{ledger_hint}", self.cfg.ledger_hint)
+            .replace("{items}", "\n".join(items))
+        )
+
     def _run_batch(self, batch_id: str, items: list[str]) -> bool:
         """One runner invocation; success = every item newly covered or batch shrank."""
-        prompt = self.cfg.prompt_template().format(
-            batch_id=batch_id,
-            items="\n".join(items),
-            ledger_hint=self.cfg.ledger_hint,
-        )
+        prompt = self._render_prompt(batch_id, items)
         argv = [prompt if a == "{prompt}" else a for a in self.cfg.runner]
         before = len(pending(items, self.cfg.ledger))
         ok = self.run_cmd(argv)
@@ -101,6 +114,9 @@ class Sweep:
 
     def _attempt(self, batch_id: str, items: list[str]) -> bool:
         """Retry one batch through the backoff schedule. True if fully covered."""
+        items = pending(items, self.cfg.ledger)
+        if not items:
+            return True
         for i in range(len(self.cfg.backoff) + 1):
             self.log(f"=== {batch_id} attempt {i + 1} ({len(items)} items)")
             self._run_batch(batch_id, items)
@@ -116,7 +132,7 @@ class Sweep:
     def run(self) -> SweepResult:
         result = SweepResult()
         todo = pending(self.manifest, self.cfg.ledger)
-        initial_pending = len(todo)
+        initial_pending = set(todo)
         queue: list[tuple[str, list[str]]] = []
         for n, i in enumerate(range(0, len(todo), self.cfg.batch_size)):
             queue.append((f"batch-{n:03d}", todo[i : i + self.cfg.batch_size]))
@@ -144,6 +160,7 @@ class Sweep:
                 result.unprocessable.append(item)
 
         # Completed is derived from the ledger, the only honest counter -
-        # items covered inside otherwise-failed batches still count.
-        result.completed = initial_pending - len(pending(self.manifest, self.cfg.ledger))
+        # items covered inside otherwise-failed batches still count, and
+        # set arithmetic stays correct even if the ledger was edited mid-run.
+        result.completed = len(initial_pending - set(pending(self.manifest, self.cfg.ledger)))
         return result

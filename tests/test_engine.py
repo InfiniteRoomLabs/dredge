@@ -62,6 +62,31 @@ def test_exit_zero_without_ledger_growth_is_failure_then_bisected(tmp_path):
     assert pending(manifest, cfg.ledger) == ["/c/poison"]
 
 
+def test_ledger_paths_containing_delimiter(tmp_path):
+    cfg = make_cfg(tmp_path)
+    append_ledger(cfg, ["/c/notes - draft/conv"])
+    assert covered(cfg.ledger) == {"/c/notes - draft/conv"}
+    assert pending(["/c/notes - draft/conv"], cfg.ledger) == []
+
+
+def test_prompt_render_survives_braces(tmp_path):
+    cfg = make_cfg(tmp_path, runner=["fake", "{prompt}"])
+    cfg.prompt_file = tmp_path / "p.txt"
+    cfg.prompt_file.write_text("literal {braces} ok\n{items}\n")
+    s = Sweep(cfg, [], run_cmd=lambda a: True, sleep=lambda s: None)
+    out = s._render_prompt("b", ["/c/{weird}/path"])
+    assert "literal {braces} ok" in out and "/c/{weird}/path" in out
+
+
+def test_rewrite_component_boundaries(tmp_path):
+    from dredge.engine import enumerate_corpus
+
+    (tmp_path / "data").mkdir()
+    (tmp_path / "database").mkdir()
+    got = enumerate_corpus([str(tmp_path / "data*")], [f"{tmp_path}/data=/x"])
+    assert f"{tmp_path}/database" in got and "/x" in got
+
+
 def test_resume_skips_covered(tmp_path):
     cfg = make_cfg(tmp_path, runner=["fake", "{prompt}"], batch_size=10)
     manifest = ["/c/a", "/c/b", "/c/c"]
